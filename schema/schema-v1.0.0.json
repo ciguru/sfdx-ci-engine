@@ -1,0 +1,714 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "JSON Schema for CT Software SFDX CI Configuration",
+  "id": "https://docs.ctsoftware.net/schemas/sfdx-ci/schema-v1.0.0.json",
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "version": {
+      "description": "CI Configuration version",
+      "type": "string",
+      "enum": ["1.0.0", "1.0", "1.0.x", "1.x"]
+    },
+    "inputs": {
+      "$ref": "#/definitions/inputs"
+    },
+    "vars": {
+      "$ref": "#/definitions/vars"
+    },
+    "steps": {
+      "description": "Job steps",
+      "type": "array",
+      "minLength": 1,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/step-ci-changeSet-create" },
+          { "$ref": "#/definitions/step-sfdx-auth-access-token" },
+          { "$ref": "#/definitions/step-sfdx-auth-list" },
+          { "$ref": "#/definitions/step-sfdx-auth-logout" },
+          { "$ref": "#/definitions/step-sfdx-auth-sfdxUrl" },
+          { "$ref": "#/definitions/step-sfdx-force-apex-execute" },
+          { "$ref": "#/definitions/step-sfdx-force-apex-test-run" },
+          { "$ref": "#/definitions/step-sfdx-force-data-bulk-upsert" },
+          { "$ref": "#/definitions/step-sfdx-force-data-tree-import" },
+          { "$ref": "#/definitions/step-sfdx-force-mdApi-deploy" },
+          { "$ref": "#/definitions/step-sfdx-force-mdApi-retrieve" },
+          { "$ref": "#/definitions/step-sfdx-force-org-create-scratch" },
+          { "$ref": "#/definitions/step-sfdx-force-org-delete" },
+          { "$ref": "#/definitions/step-sfdx-force-org-display" },
+          { "$ref": "#/definitions/step-sfdx-force-package-install" },
+          { "$ref": "#/definitions/step-sfdx-force-source-push" }
+        ]
+      }
+    }
+  },
+  "required": ["version", "steps"],
+  "definitions": {
+    "inputs": {
+      "description": "User input data. Supported by CLI tools",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "#/definitions/input"
+      }
+    },
+    "input": {
+      "description": "Attributes of User input",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "(Required) Input id. Must be unique for configuration",
+          "type": "string",
+          "pattern": "^[A-Za-z][0-9A-Za-z_-]{0,78}[0-9A-Za-z]?$"
+        },
+        "description": {
+          "description": "Input variable description. Used bu CLI tool as input question.",
+          "type": "string"
+        },
+        "required": {
+          "description": "Mark input as required",
+          "type": "boolean",
+          "default": false
+        },
+        "default": {
+          "description": "Default value of input variable",
+          "type": ["string", "number", "boolean", "null"]
+        }
+      },
+      "required": ["id"]
+    },
+    "vars": {
+      "description": "Configuration variables",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "#/definitions/var"
+      }
+    },
+    "var": {
+      "description": "Attributes for Configuration variables",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Variable id. Must be unique for configuration.",
+          "type": "string",
+          "pattern": "^[A-Za-z][0-9A-Za-z_-]{0,78}[0-9A-Za-z]?$"
+        },
+        "description": {
+          "description": "Variable description",
+          "type": "string"
+        },
+        "value": {
+          "description": "Value of variable",
+          "type": ["string", "number", "boolean", "null"]
+        }
+      },
+      "required": ["id", "value"]
+    },
+    "step-ci-changeSet-create": {
+      "description": "",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["ci.changeSet.create"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "headSha": {
+          "description": "",
+          "type": "string",
+          "pattern": "^([a-f0-9]{5,40}|\\$[0-9A-Za-z-_{}. ]*)$"
+        },
+        "baseSha": {
+          "description": "",
+          "type": "string",
+          "pattern": "^([a-f0-9]{5,40}|\\$[0-9A-Za-z-_{}. ]*)$"
+        },
+        "destructiveChangeSetMode": {
+          "$ref": "#/definitions/change-set-mode"
+        },
+        "changeSetDir": {
+          "description": "",
+          "type": "string"
+        },
+        "createRevertChangeSet": {
+          "description": "",
+          "type": "boolean"
+        },
+        "revertDestructiveChangeSetMode": {
+          "$ref": "#/definitions/change-set-mode"
+        },
+        "revertChangeSetDir": {
+          "description": "",
+          "type": "string"
+        }
+      },
+      "required": ["id", "type", "headSha", "baseSha", "changeSetDir"],
+      "if": { "properties": { "createRevertChangeSet": { "const": true } } },
+      "then": { "required": ["revertChangeSetDir"] }
+    },
+    "step-sfdx-auth-access-token": {
+      "description": "Authorize an org using an access token",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.auth.accessToken"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "alias": {
+          "description": "Alias for the authenticated org",
+          "type": "string",
+          "pattern": "^([0-9A-Za-z_-]{1,40}|\\$[0-9A-Za-z-_{}. ]*)$"
+        },
+        "instanceUrl": {
+          "description": "Login URL of the instance the org lives on",
+          "type": "string",
+          "pattern": "^(https://[a-zA-Z0-9][a-zA-Z0-9.-]{1,255}\\.salesforce\\.com/?|\\$[0-9A-Za-z-_{}. ]*)$"
+        },
+        "accessToken": {
+          "description": "Active access token",
+          "type": "string",
+          "pattern": "^(00D[0-9A-Za-z]{12}![0-9A-Za-z_.]{96}|\\$[0-9A-Za-z-_{}. ]*)$"
+        }
+      },
+      "required": ["id", "type", "alias", "instanceUrl", "accessToken"]
+    },
+    "step-sfdx-auth-list": {
+      "description": "List auth connection information",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.auth.list"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        }
+      },
+      "required": ["id", "type"]
+    },
+    "step-sfdx-auth-logout": {
+      "description": "Log out from authorized orgs",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.auth.logout"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        }
+      },
+      "required": ["id", "type", "targetUserName"]
+    },
+    "step-sfdx-auth-sfdxUrl": {
+      "description": "Authorize an org using sfdxurl",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.auth.sfdxUrl"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "alias": {
+          "description": "Alias for the authenticated org",
+          "type": "string",
+          "pattern": "^([0-9A-Za-z_-]{1,40}|\\$[0-9A-Za-z-_{}. ]*)$"
+        },
+        "sfdxUrlFile": {
+          "description": "Path to a file containing the sfdx url",
+          "type": "string"
+        }
+      },
+      "required": ["id", "type", "alias", "sfdxUrlFile"]
+    },
+    "step-sfdx-force-apex-execute": {
+      "description": "Executes anonymous Apex code",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.apex.execute"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "apexCodeFile": {
+          "description": "Path to a local file that contains Apex code",
+          "type": "string"
+        }
+      },
+      "required": ["id", "type", "targetUserName", "apexCodeFile"]
+    },
+    "step-sfdx-force-apex-test-run": {
+      "description": "Invoke Apex tests",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.apex.test.run"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "testLevel": {
+          "description": "Specifies which tests to run, using one of these TestLevel enum values:\nRunSpecifiedTests—Only the tests that you specify are run.\nRunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages.\nRunAllTestsInOrg—All tests are in your org and in installed managed packages are run",
+          "type": "string",
+          "enum": ["RunLocalTests", "RunAllTestsInOrg", "RunSpecifiedTests"]
+        },
+        "outputDir": {
+          "description": "Directory to store test run files",
+          "type": "string"
+        }
+      },
+      "required": ["id", "type", "targetUserName", "testLevel", "outputDir"]
+    },
+    "step-sfdx-force-data-bulk-upsert": {
+      "description": "Bulk upsert records from a CSV file",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.data.bulk.upsert"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "csvFile": {
+          "description": "Path to the CSV file that defines the records to upsert",
+          "type": "string"
+        },
+        "externalId": {
+          "description": "Column name of the external ID",
+          "type": "string",
+          "pattern": "^[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]$"
+        },
+        "sObjectType": {
+          "description": "SObject type of the records you want to upsert",
+          "type": "string",
+          "pattern": "^[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]$"
+        },
+        "allowNoMoreFailedBatches": {
+          "description": "(Optional. Default = 0) Mark a step as successful if the number of Failed Batches is less than the specified number.",
+          "type": "number",
+          "default": 0
+        },
+        "allowNoMoreFailedRecords": {
+          "description": "(Optional. Default = 0) Mark a step as successful if the number of Failed Records is less than the specified number.",
+          "type": "number",
+          "default": 0
+        }
+      },
+      "required": ["id", "type", "targetUserName", "csvFile", "externalId", "sObjectType"]
+    },
+    "step-sfdx-force-data-tree-import": {
+      "description": "Import data into an org",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.data.tree.import"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "planFile": {
+          "description": "Path to plan to insert multiple data files that have master-detail relationships",
+          "type": "string"
+        }
+      },
+      "required": ["id", "type", "targetUserName", "planFile"]
+    },
+    "step-sfdx-force-mdApi-deploy": {
+      "description": "Deploy metadata to an org using Metadata API",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.mdApi.deploy"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "testLevel": {
+          "description": "Specifies which tests to run, using one of these TestLevel enum values:\nNoTestRun-No one test runs\nRunSpecifiedTests—Only the tests that you specify are run.\nRunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages.\nRunAllTestsInOrg—All tests are in your org and in installed managed packages are run",
+          "type": "string",
+          "enum": ["NoTestRun", "RunLocalTests", "RunAllTestsInOrg", "RunSpecifiedTests"]
+        },
+        "checkOnly": {
+          "description": "Validate deploy but don’t save to the org",
+          "type": "boolean",
+          "default": false
+        },
+        "deployDir": {
+          "description": "Root of directory tree of files to deploy",
+          "type": "string"
+        },
+        "deployZip": {
+          "description": "Path to Zip of files to deploy",
+          "type": "string"
+        }
+      },
+      "required": ["id", "type", "targetUserName", "testLevel"]
+    },
+    "step-sfdx-force-mdApi-retrieve": {
+      "description": "Retrieve metadata from an org using Metadata API",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.mdApi.retrieve"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "retrieveTargetDir": {
+          "description": "Directory for the retrieved metadata",
+          "type": "string"
+        },
+        "manifestFile": {
+          "description": "File path of manifest of components to retrieve",
+          "type": "string"
+        },
+        "packageNames": {
+          "description": "List of packages to retrieve",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["id", "type", "targetUserName", "retrieveTargetDir"]
+    },
+    "step-sfdx-force-org-create-scratch": {
+      "description": "Create a scratch org",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.org.create.scratch"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "alias": {
+          "description": "Alias for the created org",
+          "type": "string",
+          "pattern": "^([0-9A-Za-z_-]{1,40}|\\$[0-9A-Za-z-_{}. ]*)$"
+        },
+        "noAncestors": {
+          "description": "Do not include second-generation package ancestors in the scratch org",
+          "type": "boolean",
+          "default": false
+        },
+        "definitionFile": {
+          "description": "Path to an org definition file",
+          "type": "string"
+        },
+        "devHubUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "duration": {
+          "description": "Duration of the scratch org (in days) (default: 1, min:1, max:30)",
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 30
+            },
+            {
+              "type": "string",
+              "pattern": "^\\$[0-9A-Za-z-_{}. ]*$"
+            }
+          ]
+        },
+        "overrideDefinition": {
+          "description": "Provide ability to override parameters defined in Definition File",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "adminEmail": {
+              "description": "Administrator Email Address Email address of the Dev Hub user making the scratch org creation request.",
+              "type": "string",
+              "oneOf": [
+                {
+                  "format": "email"
+                },
+                {
+                  "pattern": "^\\$[0-9A-Za-z-_{}. ]*$"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": ["id", "type", "alias", "definitionFile", "devHubUserName"]
+    },
+    "step-sfdx-force-org-delete": {
+      "description": "Mark a scratch or sandbox org for deletion",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.org.delete"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "devHubUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        }
+      },
+      "required": ["id", "type", "targetUserName", "devHubUserName"]
+    },
+    "step-sfdx-force-org-display": {
+      "description": "Get the description for the current or target org",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.org.display"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        }
+      },
+      "required": ["id", "type", "targetUserName"]
+    },
+    "step-sfdx-force-package-install": {
+      "description": "Install a package in the target org",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.package.install"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "packageId": {
+          "description": "ID (starts with 04t) or alias of the package version to install",
+          "type": "string",
+          "pattern": "^(04t([0-9A-Za-z]{12}|[0-9A-Za-z]{15})|\\$[0-9A-Za-z-_{}. ]*)$"
+        }
+      },
+      "required": ["id", "type", "targetUserName", "packageId"]
+    },
+    "step-sfdx-force-source-push": {
+      "description": "Push source to a scratch org from the project",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of step",
+          "type": "string",
+          "enum": ["sfdx.force.source.push"]
+        },
+        "id": {
+          "$ref": "#/definitions/step-id"
+        },
+        "description": {
+          "$ref": "#/definitions/step-description"
+        },
+        "continueOnError": {
+          "$ref": "#/definitions/step-continue-on-error"
+        },
+        "targetUserName": {
+          "$ref": "#/definitions/property-target-user-name"
+        },
+        "forceOverwrite": {
+          "description": "Ignore conflict warnings and overwrite changes to scratch org",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": ["id", "type", "targetUserName"]
+    },
+    "step-id": {
+      "description": "Step ID to be referenced in output. Must be unique for configuration.",
+      "type": "string",
+      "pattern": "[A-Za-z][0-9A-Za-z-_]{0,39}"
+    },
+    "step-description": {
+      "description": "Step description",
+      "type": "string"
+    },
+    "step-continue-on-error": {
+      "description": "Continue configuration execution on step error (default: false)",
+      "type": "boolean",
+      "default": false
+    },
+    "change-set-mode": {
+      "description": "",
+      "type": "string",
+      "enum": ["pre", "post"],
+      "default": "post"
+    },
+    "property-target-user-name": {
+      "description": "Username or alias for the target org",
+      "type": "string",
+      "pattern": "^([0-9A-Za-z_-]{1,40}|\\$[0-9A-Za-z-_{}. ]*)$"
+    }
+  }
+}
