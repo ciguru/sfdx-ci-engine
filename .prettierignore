@@ -2,7 +2,9 @@
 .idea
 .editorconfig
 .gitignore
+.npmignore
 .prettierignore
 /dist
+/test
 package-lock.json
 LICENSE
