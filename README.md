@@ -5,7 +5,7 @@ The Engine communicates with Salesforce through the [SFDX CLI](https://developer
 
 # Installation
 
-You can install this by either using npm installer.
+You can install this using npm installer.
 
 ### Requirements
 
@@ -22,7 +22,8 @@ an installer from nodejs.com or via an OS-specific package manager.
 
 ## Tools based on adapter
 
-- SFDX Plugin - Provides the ability to use the CI Engine as part of the [SFDX CLI](https://developer.salesforce.com/tools/sfdxcli).
+- [SFDX Plugin](https://www.npmjs.com/package/@ciguru/sfdx-ci-plugin) - Provides the ability to use
+  the CI Engine as part of the [SFDX CLI](https://developer.salesforce.com/tools/sfdxcli).
 
 ## Import in your own code
 
