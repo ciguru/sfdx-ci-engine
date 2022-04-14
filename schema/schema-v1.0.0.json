@@ -127,12 +127,12 @@
           "$ref": "#/definitions/step-continue-on-error"
         },
         "headSha": {
-          "description": "",
+          "description": "The hash number of the commit that contains the changes to merge",
           "type": "string",
           "pattern": "^([a-f0-9]{5,40}|\\$[0-9A-Za-z-_{}. ]*)$"
         },
         "baseSha": {
-          "description": "",
+          "description": "The hash number of the target commit into which the changes will be merged.",
           "type": "string",
           "pattern": "^([a-f0-9]{5,40}|\\$[0-9A-Za-z-_{}. ]*)$"
         },
@@ -140,24 +140,32 @@
           "$ref": "#/definitions/change-set-mode"
         },
         "changeSetDir": {
-          "description": "",
+          "description": "Output directory to store the Metadata API–formatted files for deploy",
           "type": "string"
         },
         "createRevertChangeSet": {
-          "description": "",
-          "type": "boolean"
+          "description": "Specify whether to create a Change Set to revert changes (default: false)",
+          "type": "boolean",
+          "default": false
         },
         "revertDestructiveChangeSetMode": {
           "$ref": "#/definitions/change-set-mode"
         },
         "revertChangeSetDir": {
-          "description": "",
+          "description": "Output directory to store the Metadata API–formatted files for revert changes",
           "type": "string"
         }
       },
       "required": ["id", "type", "headSha", "baseSha", "changeSetDir"],
-      "if": { "properties": { "createRevertChangeSet": { "const": true } } },
-      "then": { "required": ["revertChangeSetDir"] }
+      "if": {
+        "properties": {
+          "createRevertChangeSet": {
+            "oneOf": [{ "const": false }, { "const": null }]
+          }
+        }
+      },
+      "then": { "required": ["id", "type", "headSha", "baseSha", "changeSetDir"] },
+      "else": { "required": ["id", "type", "headSha", "baseSha", "changeSetDir", "revertChangeSetDir"] }
     },
     "step-sfdx-auth-access-token": {
       "description": "Authorize an org using an access token",
@@ -700,7 +708,7 @@
       "default": false
     },
     "change-set-mode": {
-      "description": "",
+      "description": "Specify whether removed components should be deleted before or after component additions (default: 'post').",
       "type": "string",
       "enum": ["pre", "post"],
       "default": "post"
