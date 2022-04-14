@@ -1,6 +1,6 @@
 {
   "name": "@ciguru/sfdx-ci-engine",
-  "version": "1.1.0-rc1",
+  "version": "1.1.0",
   "description": "CI Engine to automate the Salesforce CRM development process.",
   "main": "dist/source/index.js",
   "types": "dist/source/index.d.ts",
@@ -45,10 +45,12 @@
     "typescript": "4.6.3"
   },
   "dependencies": {
-    "@ciguru/sfdx-ts-adapter": "1.0.0",
+    "@ciguru/sfdx-ts-adapter": "1.1.0",
     "@types/js-yaml": "4.0.5",
+    "fast-xml-parser": "4.0.7",
     "jsonschema": "1.4.0",
-    "js-yaml": "4.1.0"
+    "js-yaml": "4.1.0",
+    "simple-git": "3.6.0"
   },
   "files": [
     "*"

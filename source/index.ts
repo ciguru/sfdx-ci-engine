@@ -7,12 +7,14 @@
 
 import EventEmitter from 'events';
 import * as Settings from './ci-configuration';
+import CI from './helpers/ci';
 import SFDX from './helpers/sfdx';
 import { UnloadedSettings } from './errors';
 import Variables, { Data, Output } from './variables';
 import { SfdxAdapterError } from '@ciguru/sfdx-ts-adapter';
 import {
   JSONSchemaForCTSoftwareSFDXCIConfiguration as Schema,
+  StepCiChangeSetCreate,
   StepSfdxAuthAccessToken,
   StepSfdxAuthList,
   StepSfdxAuthLogout,
@@ -31,6 +33,7 @@ import {
 } from '../lib/schema-v1.0.0';
 
 type StepTypes =
+  | StepCiChangeSetCreate
   | StepSfdxAuthAccessToken
   | StepSfdxAuthList
   | StepSfdxAuthLogout
@@ -61,6 +64,7 @@ export default class CiEngine {
   private readonly stepEngine: {
     [stepType: string]: (step: any) => Promise<void>;
   } = {
+    'ci.changeSet.create': async (step: StepCiChangeSetCreate) => this.ciChangeSetCreate(step),
     'sfdx.auth.accessToken': async (step: StepSfdxAuthAccessToken) => this.sfdxAuthAccessToken(step),
     'sfdx.auth.list': async (step: StepSfdxAuthList) => this.sfdxAuthList(step),
     'sfdx.auth.logout': async (step: StepSfdxAuthLogout) => this.sfdxAuthLogout(step),
@@ -144,6 +148,23 @@ export default class CiEngine {
     } catch (e) {
       this.event.emit('step_error', (e as Error).message);
       throw e;
+    }
+  }
+
+  private async ciChangeSetCreate(step: StepCiChangeSetCreate): Promise<void> {
+    try {
+      const outputs = await CI.changeSet.create(
+        this.vars.getStringValue(step.headSha),
+        this.vars.getStringValue(step.baseSha),
+        step.destructiveChangeSetMode || 'post',
+        this.vars.getStringValue(step.changeSetDir),
+        step.createRevertChangeSet || false,
+        step.revertDestructiveChangeSetMode || 'post',
+        this.vars.getStringValue(step.revertChangeSetDir || ''),
+      );
+      this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
     }
   }
 
