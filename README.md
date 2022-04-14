@@ -56,7 +56,7 @@ your IDE to simplify configuration process (guidelines for
 
 <table>
 <tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td><b>Description</b></td></tr>
-<tr><td>version</td><td>enum</td><td>true</td><td>CI Configuration version. Values:<br/>- 1.0.0<br/>- 1.0<br/>- 1.0.x<br/>- 1.x</td></tr>
+<tr><td>version</td><td>enum</td><td>true</td><td>CI Configuration version. Values:<br/>- 1.0.1<br/>- 1.0.0<br/>- 1.0<br/>- 1.0.x<br/>- 1.x</td></tr>
 <tr><td>inputs</td><td>Input[]</td><td>false</td><td>User input data. Supported by CLI tools</td></tr>
 <tr><td>vars</td><td>Variable[]</td><td>false</td><td>Configuration variables</td></tr>
 <tr><td>steps</td><td>Step[]</td><td>true</td><td>Job steps</td></tr>
@@ -94,6 +94,7 @@ your IDE to simplify configuration process (guidelines for
 <table>
 <tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
 <tr><td>type</td><td>enum</td><td>true</td><td>-</td><td>Type of step. Values:<br/>
+- ci.changeSet.create - Create change sets to deploy and revert Pull Requests<br/>
 - sfdx.auth.accessToken - Authorize an org using an access token<br/>
 - sfdx.auth.list - List auth connection information<br/>
 - sfdx.auth.logout - Log out from authorized orgs<br/>
@@ -113,6 +114,21 @@ your IDE to simplify configuration process (guidelines for
 <tr><td>id</td><td>string</td><td>true</td><td>-</td><td>Step ID to be referenced in output. Must be unique for configuration. Pattern: [A-Za-z][0-9A-Za-z-_]{0,39}</td></tr>
 <tr><td>description</td><td>string</td><td>false</td><td>-</td><td>Step description.</td></tr>
 <tr><td>continueOnError</td><td>string</td><td>false</td><td>-</td><td>Continue configuration execution on step error (default: false)</td></tr>
+</table>
+
+#### Additional attributes for `ci.changeSet.create` step (since v1.1.0)
+
+Create change sets to deploy and revert Pull Requests
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>headSha</td><td>string</td><td>true</td><td>yes</td><td>The hash number of the commit that contains the changes to merge. Pattern: [a-f0-9]{5,40}</td></tr>
+<tr><td>baseSha</td><td>string</td><td>true</td><td>yes</td><td>The hash number of the target commit into which the changes will be merged. Pattern: [a-f0-9]{5,40}</td></tr>
+<tr><td>destructiveChangeSetMode</td><td>enum</td><td>false</td><td>-</td><td>Specify whether removed components should be deleted before or after component additions. Enum values:<br/>- pre<br/>- post - default value</td></tr>
+<tr><td>changeSetDir</td><td>string</td><td>true</td><td>yes</td><td>Output directory to store the Metadata API–formatted files for deploy</td></tr>
+<tr><td>createRevertChangeSet</td><td>boolean</td><td>false</td><td>-</td><td>Specify whether to create a Change Set to revert changes (default: false)</td></tr>
+<tr><td>revertDestructiveChangeSetMode</td><td>enum</td><td>false</td><td>-</td><td>Specify whether removed components should be deleted before or after component additions. Enum values:<br/>- pre<br/>- post - default value</td></tr>
+<tr><td>revertChangeSetDir</td><td>string</td><td>true, if createRevertChangeSet=true</td><td>yes</td><td>Output directory to store the Metadata API–formatted files for revert changes</td></tr>
 </table>
 
 #### Additional attributes for `sfdx.auth.accessToken` step
