@@ -108,7 +108,7 @@
       "required": ["id", "value"]
     },
     "step-ci-changeSet-create": {
-      "description": "",
+      "description": "Create change sets to deploy and revert Pull Requests",
       "type": "object",
       "additionalProperties": false,
       "properties": {
