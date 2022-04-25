@@ -6,14 +6,13 @@
  */
 
 import EventEmitter from 'events';
-import * as Settings from './ci-configuration';
+import { load, Schema } from './ci-configuration';
 import CI from './helpers/ci';
 import SFDX from './helpers/sfdx';
 import { UnloadedSettings } from './errors';
 import Variables, { Data, Output } from './variables';
 import { SfdxAdapterError } from '@ciguru/sfdx-ts-adapter';
 import {
-  JSONSchemaForCTSoftwareSFDXCIConfiguration as Schema,
   StepCiChangeSetCreate,
   StepSfdxAuthAccessToken,
   StepSfdxAuthList,
@@ -30,7 +29,7 @@ import {
   StepSfdxForceOrgDisplay,
   StepSfdxForcePackageInstall,
   StepSfdxForceSourcePush,
-} from '../lib/schema-v1.0.0';
+} from '../lib/schema-v1';
 
 type StepTypes =
   | StepCiChangeSetCreate
@@ -87,7 +86,7 @@ export default class CiEngine {
   private stepIdMap: { [id: string]: number } = {};
 
   async loadSettings(): Promise<Schema> {
-    const { settings, stepIdMap } = await Settings.load(this.settingsPath);
+    const { settings, stepIdMap } = await load(this.settingsPath);
     this.stepIdMap = stepIdMap;
     return (this.settings = settings);
   }
