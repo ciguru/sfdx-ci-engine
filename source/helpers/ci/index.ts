@@ -6,6 +6,7 @@
  */
 
 import ChangeSetCreate, { DestructiveChangeSetMode, Changes } from './change-set/create';
+import DataTransfer, { Output, SObjectItem } from './data/transfer';
 
 interface CI {
   changeSet: {
@@ -18,6 +19,18 @@ interface CI {
       revertDestructiveChangeSetMode: DestructiveChangeSetMode,
       revertChangeSetDir: string,
     ) => Promise<Changes>;
+  };
+  data: {
+    transfer: (
+      sourceOrgAlias: string,
+      targetOrgAlias: string,
+      sObjectType: SObjectItem,
+      sObjectFields: SObjectItem[],
+      queryFilter: string,
+      externalId: string,
+      allowNoMoreFailedBatches?: number,
+      allowNoMoreFailedRecords?: number,
+    ) => Promise<Output>;
   };
 }
 
@@ -40,6 +53,28 @@ const ci: CI = {
         createRevertChangeSet,
         revertDestructiveChangeSetMode,
         revertChangeSetDir,
+      ),
+  },
+  data: {
+    transfer: async (
+      sourceOrgAlias: string,
+      targetOrgAlias: string,
+      sObjectType: SObjectItem,
+      sObjectFields: SObjectItem[],
+      queryFilter: string,
+      externalId: string,
+      allowNoMoreFailedBatches?: number,
+      allowNoMoreFailedRecords?: number,
+    ) =>
+      await DataTransfer(
+        sourceOrgAlias,
+        targetOrgAlias,
+        sObjectType,
+        sObjectFields,
+        queryFilter,
+        externalId,
+        allowNoMoreFailedBatches,
+        allowNoMoreFailedRecords,
       ),
   },
 };

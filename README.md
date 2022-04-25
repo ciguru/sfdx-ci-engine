@@ -45,7 +45,7 @@ const result = ci.getOutputs();
 ## Supported configuration file formats
 
 You can use YAML (`.yaml` or `.yml`) or JSON (`.json`) files to set up the
-configuration. You can import [JSON Schema](/schema/schema-v1.0.0.json) in
+configuration. You can import [JSON Schema](/schema/schema-v1.1.0.json) in
 your IDE to simplify configuration process (guidelines for
 [WebStorm](https://www.jetbrains.com/help/webstorm/json.html#ws_json_using_schemas) and
 [VS Code](https://code.visualstudio.com/docs/languages/json#_json-schemas-and-settings)).
@@ -56,7 +56,7 @@ your IDE to simplify configuration process (guidelines for
 
 <table>
 <tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td><b>Description</b></td></tr>
-<tr><td>version</td><td>enum</td><td>true</td><td>CI Configuration version. Values:<br/>- 1.0.1<br/>- 1.0.0<br/>- 1.0<br/>- 1.0.x<br/>- 1.x</td></tr>
+<tr><td>version</td><td>enum</td><td>true</td><td>CI Configuration version. Values:<br/>- 1.x</td></tr>
 <tr><td>inputs</td><td>Input[]</td><td>false</td><td>User input data. Supported by CLI tools</td></tr>
 <tr><td>vars</td><td>Variable[]</td><td>false</td><td>Configuration variables</td></tr>
 <tr><td>steps</td><td>Step[]</td><td>true</td><td>Job steps</td></tr>
@@ -95,14 +95,17 @@ your IDE to simplify configuration process (guidelines for
 <tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
 <tr><td>type</td><td>enum</td><td>true</td><td>-</td><td>Type of step. Values:<br/>
 - ci.changeSet.create - Create change sets to deploy and revert Pull Requests<br/>
+- ci.data.transfer - Transfer data form one Salesforce org to Another using bulk data API<br/>
 - sfdx.auth.accessToken - Authorize an org using an access token<br/>
 - sfdx.auth.list - List auth connection information<br/>
 - sfdx.auth.logout - Log out from authorized orgs<br/>
 - sfdx.auth.sfdxUrl - Authorize an org using sfdxurl<br/>
 - sfdx.force.apex.execute - Executes anonymous Apex code<br/>
 - sfdx.force.apex.test.run - Invoke Apex tests<br/>
+- sfdx.force.data.bulk.delete - Bulk delete records from a CSV file<br/>
 - sfdx.force.data.bulk.upsert - Bulk upsert records from a CSV file<br/>
 - sfdx.force.data.tree.import - Import data into an org<br/>
+- sfdx.force.data.soql.query.csv - Import data into an org<br/>
 - sfdx.force.mdApi.deploy - Deploy metadata to an org using Metadata API<br/>
 - sfdx.force.mdApi.retrieve - Retrieve metadata from an org using Metadata API<br/>
 - sfdx.force.org.create.scratch - Create a scratch org<br/>
@@ -129,6 +132,30 @@ Create change sets to deploy and revert Pull Requests
 <tr><td>createRevertChangeSet</td><td>boolean</td><td>false</td><td>-</td><td>Specify whether to create a Change Set to revert changes (default: false)</td></tr>
 <tr><td>revertDestructiveChangeSetMode</td><td>enum</td><td>false</td><td>-</td><td>Specify whether removed components should be deleted before or after component additions. Enum values:<br/>- pre<br/>- post - default value</td></tr>
 <tr><td>revertChangeSetDir</td><td>string</td><td>true, if createRevertChangeSet=true</td><td>yes</td><td>Output directory to store the Metadata API–formatted files for revert changes</td></tr>
+</table>
+
+#### Additional attributes for `ci.data.transfer` step (since v1.2.0)
+
+Create change sets to deploy and revert Pull Requests
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>sourceOrgAlias</td><td>string</td><td>true</td><td>yes</td><td>Alias of the Salesforce org from which data will be loaded for transfer. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
+<tr><td>targetOrgAlias</td><td>string</td><td>true</td><td>yes</td><td>Salesforce org alias for data transfer. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
+<tr><td>sObjectType</td><td>string | sObjectItem</td><td>true</td><td>-</td><td>Salesforce object. Specify 'source' and 'target' object if they are different. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
+<tr><td>sObjectFields</td><td>string | sObjectItem</td><td>true</td><td>-</td><td>Array of Salesforce object fields. Specify 'source' and 'target' fields if they are different. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z](\.[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]){0,4}</td></tr>
+<tr><td>queryFilter</td><td>string</td><td>false</td><td>-</td><td>Query filter for Source org data. Allowed WHERE and LIMIT</td></tr>
+<tr><td>externalId</td><td>string</td><td>true</td><td>-</td><td>Column name of the external ID in Target Salesforce Org. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
+<tr><td>allowNoMoreFailedBatches</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Batches is less than the specified number (default: 0).</td></tr>
+<tr><td>allowNoMoreFailedRecords</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Records is less than the specified number (default: 0).</td></tr>
+</table>
+
+##### Additional attributes for `sObjectItem` step (since v1.2.0)
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>source</td><td>string</td><td>true</td><td>yes</td><td>Source Salesforce org object|field. <br/>Pattern for fields: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z] <br/>Pattern for fields: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z](\.[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]){0,4}</td></tr>
+<tr><td>target</td><td>string</td><td>true</td><td>yes</td><td>Target Salesforce org object|field. <br/>Pattern for fields: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z] <br/>Pattern for fields: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z](\.[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]){0,4}</td></tr>
 </table>
 
 #### Additional attributes for `sfdx.auth.accessToken` step
@@ -190,6 +217,19 @@ Invoke Apex tests
 <tr><td>outputDir</td><td>string</td><td>true</td><td>yes</td><td>Directory to store test run files</td></tr>
 </table>
 
+#### Additional attributes for `sfdx.force.data.bulk.delete` step
+
+Bulk delete records from a CSV file
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>targetUserName</td><td>string</td><td>true</td><td>yes</td><td>Username or alias for the target org. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
+<tr><td>csvFile</td><td>string</td><td>true</td><td>yes</td><td>Path to the CSV file that defines the records to delete</td></tr>
+<tr><td>sObjectType</td><td>string</td><td>true</td><td>-</td><td>SObject type of the records you want to delete. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
+<tr><td>allowNoMoreFailedBatches</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Batches is less than the specified number (default: 0).</td></tr>
+<tr><td>allowNoMoreFailedRecords</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Records is less than the specified number (default: 0).</td></tr>
+</table>
+
 #### Additional attributes for `sfdx.force.data.bulk.upsert` step
 
 Bulk upsert records from a CSV file
@@ -202,6 +242,19 @@ Bulk upsert records from a CSV file
 <tr><td>sObjectType</td><td>string</td><td>true</td><td>-</td><td>SObject type of the records you want to upsert. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
 <tr><td>allowNoMoreFailedBatches</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Batches is less than the specified number (default: 0).</td></tr>
 <tr><td>allowNoMoreFailedRecords</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Records is less than the specified number (default: 0).</td></tr>
+</table>
+
+#### Additional attributes for `sfdx.force.data.soql.query.csv` step
+
+Bulk upsert records from a CSV file
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>targetUserName</td><td>string</td><td>true</td><td>yes</td><td>Username or alias for the target org. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
+<tr><td>csvFile</td><td>string</td><td>true</td><td>yes</td><td>Path to the CSV file name to save output data</td></tr>
+<tr><td>sObjectType</td><td>string</td><td>true</td><td>-</td><td>Salesforce object to query data. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
+<tr><td>sObjectFields</td><td>string[]</td><td>true</td><td>-</td><td>Array of Salesforce object fields to query. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z](\.[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]){0,4}</td></tr>
+<tr><td>queryFilter</td><td>string</td><td>false</td><td>-</td><td>Query filter for Source org data. Allowed WHERE and LIMIT</td></tr>
 </table>
 
 #### Additional attributes for `sfdx.force.data.tree.import` step

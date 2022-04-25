@@ -6,12 +6,16 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
-import { Validator } from 'jsonschema';
+import { Validator, ValidatorResult } from 'jsonschema';
 import JsYaml from 'js-yaml';
 
 import { FileNotExist, IncorrectContentOfFile, IncorrectFileType, IncorrectSchema, DuplicateStepId } from './errors';
-import { JSONSchemaForCTSoftwareSFDXCIConfiguration as Schema } from '../lib/schema-v1.0.0';
-import JsonSchema from '../schema/schema-v1.0.0.json';
+import { JSONSchemaForCTSoftwareSFDXCIConfiguration as SchemaV100 } from '../lib/schema-v1.0.0';
+import { JSONSchemaForCTSoftwareSFDXCIConfiguration as SchemaV1 } from '../lib/schema-v1';
+import JsonSchemaV100 from '../schema/schema-v1.0.0.json';
+import JsonSchemaV110 from '../schema/schema-v1.1.0.json';
+
+export type Schema = SchemaV100 | SchemaV1;
 
 function parseConfigurationFile(filePath: string, rawSettings: string): Schema {
   switch (filePath.slice(filePath.lastIndexOf('.')).toLowerCase()) {
@@ -61,7 +65,22 @@ export async function load(filePath: string): Promise<{ settings: Schema; stepId
   const settings: Schema = parseConfigurationFile(filePath, rawSettings);
 
   // Validate data
-  const validationResult = new Validator().validate(settings, JsonSchema);
+  let validationResult: ValidatorResult;
+
+  switch (settings.version) {
+    case '1.0.0':
+    case '1.0.x':
+    case '1.0':
+      validationResult = new Validator().validate(settings, JsonSchemaV100);
+      break;
+    case '1.1.0':
+    case '1.1.x':
+    case '1.1':
+    case '1.x':
+    default:
+      validationResult = new Validator().validate(settings, JsonSchemaV110);
+  }
+
   if (!validationResult.valid) {
     throw new IncorrectSchema(filePath, validationResult.errors.toString());
   }

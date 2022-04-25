@@ -9,7 +9,8 @@ import SFDX, { SfdxOutputs } from '@ciguru/sfdx-ts-adapter';
 import { TestLevel as ApexTestLevel } from '@ciguru/sfdx-ts-adapter/dist/force/apex/test/run';
 import { TestLevel as DeployTestLevel } from '@ciguru/sfdx-ts-adapter/dist/force/mdapi/deploy';
 import { OverrideDefinition } from '@ciguru/sfdx-ts-adapter/dist/force/org/create';
-import MetadataDeploy from './metadataDeploy';
+import MetadataDeploy from './metadata-deploy';
+import { DataSoqlQueryCsv } from './soql-query';
 
 interface Sfdx {
   auth: {
@@ -39,6 +40,13 @@ interface Sfdx {
     };
     data: {
       bulk: {
+        delete: (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          allowNoMoreFailedBatches?: number,
+          allowNoMoreFailedRecords?: number,
+        ) => Promise<SfdxOutputs['force']['data']['bulk']['delete']>;
         upsert: (
           targetUserName: string,
           csvFile: string,
@@ -50,6 +58,16 @@ interface Sfdx {
       };
       tree: {
         import: (targetUserName: string, planFile: string) => Promise<SfdxOutputs['force']['data']['tree']['import']>;
+      };
+      soql: {
+        queryCsv: (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          sObjectFields: string[],
+          queryFilter: string,
+          replaceCsvHeader?: string[],
+        ) => Promise<SfdxOutputs['force']['data']['soql']['queryCsv']>;
       };
     };
     mdApi: {
@@ -113,6 +131,20 @@ const sfdx: Sfdx = {
     },
     data: {
       bulk: {
+        delete: async (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          allowNoMoreFailedBatches?: number,
+          allowNoMoreFailedRecords?: number,
+        ) =>
+          await SFDX.force.data.bulk.delete(
+            targetUserName,
+            csvFile,
+            sObjectType,
+            allowNoMoreFailedBatches,
+            allowNoMoreFailedRecords,
+          ),
         upsert: async (
           targetUserName: string,
           csvFile: string,
@@ -133,6 +165,16 @@ const sfdx: Sfdx = {
       tree: {
         import: async (targetUserName: string, planFile: string) =>
           await SFDX.force.data.tree.import(targetUserName, planFile),
+      },
+      soql: {
+        queryCsv: async (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          sObjectFields: string[],
+          queryFilter: string,
+          replaceCsvHeader?: string[],
+        ) => await DataSoqlQueryCsv(targetUserName, csvFile, sObjectType, sObjectFields, queryFilter, replaceCsvHeader),
       },
     },
     mdApi: {

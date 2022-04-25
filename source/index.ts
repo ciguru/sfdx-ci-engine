@@ -6,23 +6,25 @@
  */
 
 import EventEmitter from 'events';
-import * as Settings from './ci-configuration';
+import { load, Schema } from './ci-configuration';
 import CI from './helpers/ci';
 import SFDX from './helpers/sfdx';
 import { UnloadedSettings } from './errors';
 import Variables, { Data, Output } from './variables';
 import { SfdxAdapterError } from '@ciguru/sfdx-ts-adapter';
 import {
-  JSONSchemaForCTSoftwareSFDXCIConfiguration as Schema,
   StepCiChangeSetCreate,
+  StepCiDataTransfer,
   StepSfdxAuthAccessToken,
   StepSfdxAuthList,
   StepSfdxAuthLogout,
   StepSfdxAuthSfdxUrl,
   StepSfdxForceApexExecute,
   StepSfdxForceApexTestRun,
+  StepSfdxForceDataBulkDelete,
   StepSfdxForceDataBulkUpsert,
   StepSfdxForceDataTreeImport,
+  StepSfdxForceDataSoqlQueryCsv,
   StepSfdxForceMdApiDeploy,
   StepSfdxForceMdApiRetrieve,
   StepSfdxForceOrgCreateScratch,
@@ -30,18 +32,21 @@ import {
   StepSfdxForceOrgDisplay,
   StepSfdxForcePackageInstall,
   StepSfdxForceSourcePush,
-} from '../lib/schema-v1.0.0';
+} from '../lib/schema-v1';
 
 type StepTypes =
   | StepCiChangeSetCreate
+  | StepCiDataTransfer
   | StepSfdxAuthAccessToken
   | StepSfdxAuthList
   | StepSfdxAuthLogout
   | StepSfdxAuthSfdxUrl
   | StepSfdxForceApexExecute
   | StepSfdxForceApexTestRun
+  | StepSfdxForceDataBulkDelete
   | StepSfdxForceDataBulkUpsert
   | StepSfdxForceDataTreeImport
+  | StepSfdxForceDataSoqlQueryCsv
   | StepSfdxForceMdApiDeploy
   | StepSfdxForceMdApiRetrieve
   | StepSfdxForceOrgCreateScratch
@@ -65,14 +70,18 @@ export default class CiEngine {
     [stepType: string]: (step: any) => Promise<void>;
   } = {
     'ci.changeSet.create': async (step: StepCiChangeSetCreate) => this.ciChangeSetCreate(step),
+    'ci.data.transfer': async (step: StepCiDataTransfer) => this.ciDataTransfer(step),
     'sfdx.auth.accessToken': async (step: StepSfdxAuthAccessToken) => this.sfdxAuthAccessToken(step),
     'sfdx.auth.list': async (step: StepSfdxAuthList) => this.sfdxAuthList(step),
     'sfdx.auth.logout': async (step: StepSfdxAuthLogout) => this.sfdxAuthLogout(step),
     'sfdx.auth.sfdxUrl': async (step: StepSfdxAuthSfdxUrl) => this.sfdxAuthSfdxUrl(step),
     'sfdx.force.apex.execute': async (step: StepSfdxForceApexExecute) => this.sfdxForceApexExecute(step),
     'sfdx.force.apex.test.run': async (step: StepSfdxForceApexTestRun) => this.sfdxForceApexTestRun(step),
+    'sfdx.force.data.bulk.delete': async (step: StepSfdxForceDataBulkDelete) => this.sfdxForceDataBulkDelete(step),
     'sfdx.force.data.bulk.upsert': async (step: StepSfdxForceDataBulkUpsert) => this.sfdxForceDataBulkUpsert(step),
     'sfdx.force.data.tree.import': async (step: StepSfdxForceDataTreeImport) => this.sfdxForceDataTreeImport(step),
+    'sfdx.force.data.soql.query.csv': async (step: StepSfdxForceDataSoqlQueryCsv) =>
+      this.sfdxForceDataSoqlQueryCsv(step),
     'sfdx.force.mdApi.deploy': async (step: StepSfdxForceMdApiDeploy) => this.sfdxForceMdApiDeploy(step),
     'sfdx.force.mdApi.retrieve': async (step: StepSfdxForceMdApiRetrieve) => this.sfdxForceMdApiRetrieve(step),
     'sfdx.force.org.create.scratch': async (step: StepSfdxForceOrgCreateScratch) =>
@@ -87,7 +96,7 @@ export default class CiEngine {
   private stepIdMap: { [id: string]: number } = {};
 
   async loadSettings(): Promise<Schema> {
-    const { settings, stepIdMap } = await Settings.load(this.settingsPath);
+    const { settings, stepIdMap } = await load(this.settingsPath);
     this.stepIdMap = stepIdMap;
     return (this.settings = settings);
   }
@@ -168,6 +177,24 @@ export default class CiEngine {
     }
   }
 
+  private async ciDataTransfer(step: StepCiDataTransfer): Promise<void> {
+    try {
+      const outputs = await CI.data.transfer(
+        this.vars.getStringValue(step.sourceOrgAlias),
+        this.vars.getStringValue(step.targetOrgAlias),
+        step.sObjectType,
+        step.sObjectFields,
+        step.queryFilter || '',
+        step.externalId,
+        step.allowNoMoreFailedBatches,
+        step.allowNoMoreFailedRecords,
+      );
+      this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
+    }
+  }
+
   private async sfdxAuthAccessToken(step: StepSfdxAuthAccessToken): Promise<void> {
     try {
       const outputs = await SFDX.auth.accessToken.store(
@@ -236,6 +263,21 @@ export default class CiEngine {
     }
   }
 
+  private async sfdxForceDataBulkDelete(step: StepSfdxForceDataBulkDelete): Promise<void> {
+    try {
+      const outputs = await SFDX.force.data.bulk.delete(
+        this.vars.getStringValue(step.targetUserName),
+        this.vars.getStringValue(step.csvFile),
+        step.sObjectType,
+        step.allowNoMoreFailedBatches,
+        step.allowNoMoreFailedRecords,
+      );
+      this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
+    }
+  }
+
   private async sfdxForceDataBulkUpsert(step: StepSfdxForceDataBulkUpsert): Promise<void> {
     try {
       const outputs = await SFDX.force.data.bulk.upsert(
@@ -259,6 +301,21 @@ export default class CiEngine {
         this.vars.getStringValue(step.planFile),
       );
       this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
+    }
+  }
+
+  private async sfdxForceDataSoqlQueryCsv(step: StepSfdxForceDataSoqlQueryCsv): Promise<void> {
+    try {
+      await SFDX.force.data.soql.queryCsv(
+        this.vars.getStringValue(step.targetUserName),
+        this.vars.getStringValue(step.csvFile),
+        step.sObjectType,
+        step.sObjectFields,
+        step.queryFilter || '',
+      );
+      this.vars.setOutput({ id: step.id });
     } catch (e) {
       this.stepErrorHandler(step, e as SfdxAdapterError);
     }

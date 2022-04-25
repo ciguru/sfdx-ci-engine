@@ -6,6 +6,7 @@
  */
 
 import { SfdxAdapterError } from '@ciguru/sfdx-ts-adapter';
+import { CiOutput } from './helpers/ci/output';
 import { Output as SFDXOutput } from './helpers/sfdx/output';
 import { Vars, Input } from '../lib/schema-v1.0.0';
 
@@ -18,7 +19,7 @@ export interface Output {
   [stepId: string]:
     | {
         success: true;
-        outputs: SFDXOutput;
+        outputs: SFDXOutput | CiOutput;
       }
     | {
         success: false;
@@ -55,14 +56,9 @@ export default class Variables {
     },
   };
 
-  setOutput(data: { id?: string; outputs?: SFDXOutput; error?: SfdxAdapterError }): void {
+  setOutput(data: { id?: string; outputs?: SFDXOutput | CiOutput; error?: SfdxAdapterError }): void {
     if (data.id) {
-      if (!!data.outputs) {
-        this.outputs[data.id] = {
-          success: true,
-          outputs: data.outputs,
-        };
-      } else if (!!data.error) {
+      if (!!data.error) {
         this.outputs[data.id] = {
           success: false,
           error: {
@@ -72,6 +68,11 @@ export default class Variables {
             logs: data.error.logs,
             summary: data.error.summary,
           },
+        };
+      } else {
+        this.outputs[data.id] = {
+          success: true,
+          outputs: data.outputs,
         };
       }
     }
