@@ -14,6 +14,7 @@ import Variables, { Data, Output } from './variables';
 import { SfdxAdapterError } from '@ciguru/sfdx-ts-adapter';
 import {
   StepCiChangeSetCreate,
+  StepCiDataTransfer,
   StepSfdxAuthAccessToken,
   StepSfdxAuthList,
   StepSfdxAuthLogout,
@@ -35,6 +36,7 @@ import {
 
 type StepTypes =
   | StepCiChangeSetCreate
+  | StepCiDataTransfer
   | StepSfdxAuthAccessToken
   | StepSfdxAuthList
   | StepSfdxAuthLogout
@@ -68,6 +70,7 @@ export default class CiEngine {
     [stepType: string]: (step: any) => Promise<void>;
   } = {
     'ci.changeSet.create': async (step: StepCiChangeSetCreate) => this.ciChangeSetCreate(step),
+    'ci.data.transfer': async (step: StepCiDataTransfer) => this.ciDataTransfer(step),
     'sfdx.auth.accessToken': async (step: StepSfdxAuthAccessToken) => this.sfdxAuthAccessToken(step),
     'sfdx.auth.list': async (step: StepSfdxAuthList) => this.sfdxAuthList(step),
     'sfdx.auth.logout': async (step: StepSfdxAuthLogout) => this.sfdxAuthLogout(step),
@@ -167,6 +170,24 @@ export default class CiEngine {
         step.createRevertChangeSet || false,
         step.revertDestructiveChangeSetMode || 'post',
         this.vars.getStringValue(step.revertChangeSetDir || ''),
+      );
+      this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
+    }
+  }
+
+  private async ciDataTransfer(step: StepCiDataTransfer): Promise<void> {
+    try {
+      const outputs = await CI.data.transfer(
+        this.vars.getStringValue(step.sourceOrgAlias),
+        this.vars.getStringValue(step.targetOrgAlias),
+        step.sObjectType,
+        step.sObjectFields,
+        step.queryFilter || '',
+        step.externalId,
+        step.allowNoMoreFailedBatches,
+        step.allowNoMoreFailedRecords,
       );
       this.vars.setOutput({ id: step.id, outputs });
     } catch (e) {

@@ -66,6 +66,7 @@ interface Sfdx {
           sObjectType: string,
           sObjectFields: string[],
           queryFilter: string,
+          replaceCsvHeader?: string[],
         ) => Promise<SfdxOutputs['force']['data']['soql']['queryCsv']>;
       };
     };
@@ -172,7 +173,8 @@ const sfdx: Sfdx = {
           sObjectType: string,
           sObjectFields: string[],
           queryFilter: string,
-        ) => await DataSoqlQueryCsv(targetUserName, csvFile, sObjectType, sObjectFields, queryFilter),
+          replaceCsvHeader?: string[],
+        ) => await DataSoqlQueryCsv(targetUserName, csvFile, sObjectType, sObjectFields, queryFilter, replaceCsvHeader),
       },
     },
     mdApi: {

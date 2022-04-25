@@ -18,10 +18,12 @@ export async function DataSoqlQueryCsv(
   sObjectType: string,
   sObjectFields: string[],
   queryFilter: string,
+  replaceCsvHeader?: string[],
 ): Promise<Output> {
   return await SFDX.force.data.soql.queryCsv(
     targetUserName,
     csvFile,
     buildQueryString(sObjectType, sObjectFields, queryFilter),
+    replaceCsvHeader ? replaceCsvHeader?.join(',') : undefined,
   );
 }
