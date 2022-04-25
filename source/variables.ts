@@ -57,12 +57,7 @@ export default class Variables {
 
   setOutput(data: { id?: string; outputs?: SFDXOutput; error?: SfdxAdapterError }): void {
     if (data.id) {
-      if (!!data.outputs) {
-        this.outputs[data.id] = {
-          success: true,
-          outputs: data.outputs,
-        };
-      } else if (!!data.error) {
+      if (!!data.error) {
         this.outputs[data.id] = {
           success: false,
           error: {
@@ -72,6 +67,11 @@ export default class Variables {
             logs: data.error.logs,
             summary: data.error.summary,
           },
+        };
+      } else {
+        this.outputs[data.id] = {
+          success: true,
+          outputs: data.outputs,
         };
       }
     }

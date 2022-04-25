@@ -22,6 +22,7 @@ import {
   StepSfdxForceApexTestRun,
   StepSfdxForceDataBulkUpsert,
   StepSfdxForceDataTreeImport,
+  StepSfdxForceDataSoqlQueryCsv,
   StepSfdxForceMdApiDeploy,
   StepSfdxForceMdApiRetrieve,
   StepSfdxForceOrgCreateScratch,
@@ -41,6 +42,7 @@ type StepTypes =
   | StepSfdxForceApexTestRun
   | StepSfdxForceDataBulkUpsert
   | StepSfdxForceDataTreeImport
+  | StepSfdxForceDataSoqlQueryCsv
   | StepSfdxForceMdApiDeploy
   | StepSfdxForceMdApiRetrieve
   | StepSfdxForceOrgCreateScratch
@@ -72,6 +74,8 @@ export default class CiEngine {
     'sfdx.force.apex.test.run': async (step: StepSfdxForceApexTestRun) => this.sfdxForceApexTestRun(step),
     'sfdx.force.data.bulk.upsert': async (step: StepSfdxForceDataBulkUpsert) => this.sfdxForceDataBulkUpsert(step),
     'sfdx.force.data.tree.import': async (step: StepSfdxForceDataTreeImport) => this.sfdxForceDataTreeImport(step),
+    'sfdx.force.data.soql.query.csv': async (step: StepSfdxForceDataSoqlQueryCsv) =>
+      this.sfdxForceDataSoqlQueryCsv(step),
     'sfdx.force.mdApi.deploy': async (step: StepSfdxForceMdApiDeploy) => this.sfdxForceMdApiDeploy(step),
     'sfdx.force.mdApi.retrieve': async (step: StepSfdxForceMdApiRetrieve) => this.sfdxForceMdApiRetrieve(step),
     'sfdx.force.org.create.scratch': async (step: StepSfdxForceOrgCreateScratch) =>
@@ -258,6 +262,21 @@ export default class CiEngine {
         this.vars.getStringValue(step.planFile),
       );
       this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
+    }
+  }
+
+  private async sfdxForceDataSoqlQueryCsv(step: StepSfdxForceDataSoqlQueryCsv): Promise<void> {
+    try {
+      await SFDX.force.data.soql.queryCsv(
+        this.vars.getStringValue(step.targetUserName),
+        this.vars.getStringValue(step.csvFile),
+        step.sObjectType,
+        step.sObjectFields,
+        step.queryFilter || '',
+      );
+      this.vars.setOutput({ id: step.id });
     } catch (e) {
       this.stepErrorHandler(step, e as SfdxAdapterError);
     }

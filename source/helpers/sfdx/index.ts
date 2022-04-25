@@ -10,6 +10,7 @@ import { TestLevel as ApexTestLevel } from '@ciguru/sfdx-ts-adapter/dist/force/a
 import { TestLevel as DeployTestLevel } from '@ciguru/sfdx-ts-adapter/dist/force/mdapi/deploy';
 import { OverrideDefinition } from '@ciguru/sfdx-ts-adapter/dist/force/org/create';
 import MetadataDeploy from './metadataDeploy';
+import { DataSoqlQueryCsv } from './soql-query';
 
 interface Sfdx {
   auth: {
@@ -50,6 +51,15 @@ interface Sfdx {
       };
       tree: {
         import: (targetUserName: string, planFile: string) => Promise<SfdxOutputs['force']['data']['tree']['import']>;
+      };
+      soql: {
+        queryCsv: (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          sObjectFields: string[],
+          queryFilter: string,
+        ) => Promise<SfdxOutputs['force']['data']['soql']['queryCsv']>;
       };
     };
     mdApi: {
@@ -133,6 +143,15 @@ const sfdx: Sfdx = {
       tree: {
         import: async (targetUserName: string, planFile: string) =>
           await SFDX.force.data.tree.import(targetUserName, planFile),
+      },
+      soql: {
+        queryCsv: async (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          sObjectFields: string[],
+          queryFilter: string,
+        ) => await DataSoqlQueryCsv(targetUserName, csvFile, sObjectType, sObjectFields, queryFilter),
       },
     },
     mdApi: {

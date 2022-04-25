@@ -103,6 +103,7 @@ your IDE to simplify configuration process (guidelines for
 - sfdx.force.apex.test.run - Invoke Apex tests<br/>
 - sfdx.force.data.bulk.upsert - Bulk upsert records from a CSV file<br/>
 - sfdx.force.data.tree.import - Import data into an org<br/>
+- sfdx.force.data.soql.query.csv - Import data into an org<br/>
 - sfdx.force.mdApi.deploy - Deploy metadata to an org using Metadata API<br/>
 - sfdx.force.mdApi.retrieve - Retrieve metadata from an org using Metadata API<br/>
 - sfdx.force.org.create.scratch - Create a scratch org<br/>
@@ -202,6 +203,19 @@ Bulk upsert records from a CSV file
 <tr><td>sObjectType</td><td>string</td><td>true</td><td>-</td><td>SObject type of the records you want to upsert. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
 <tr><td>allowNoMoreFailedBatches</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Batches is less than the specified number (default: 0).</td></tr>
 <tr><td>allowNoMoreFailedRecords</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Records is less than the specified number (default: 0).</td></tr>
+</table>
+
+#### Additional attributes for `sfdx.force.data.soql.query.csv` step
+
+Bulk upsert records from a CSV file
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>targetUserName</td><td>string</td><td>true</td><td>yes</td><td>Username or alias for the target org. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
+<tr><td>csvFile</td><td>string</td><td>true</td><td>yes</td><td>Path to the CSV file name to save output data</td></tr>
+<tr><td>sObjectType</td><td>string</td><td>true</td><td>-</td><td>Salesforce object to query data. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
+<tr><td>sObjectFields</td><td>string[]</td><td>true</td><td>-</td><td>Array of Salesforce object fields to query. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z](\.[A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]){0,4}</td></tr>
+<tr><td>queryFilter</td><td>string</td><td>false</td><td>-</td><td>Query filter for Source org data. Allowed WHERE and LIMIT</td></tr>
 </table>
 
 #### Additional attributes for `sfdx.force.data.tree.import` step
