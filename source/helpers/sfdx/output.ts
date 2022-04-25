@@ -5,11 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Changes } from '../ci/change-set/create';
 import { SfdxOutputs } from '@ciguru/sfdx-ts-adapter';
 
 export type Output =
-  | Changes
   | SfdxOutputs['auth']['accessToken']['store']
   | SfdxOutputs['auth']['sfdxUrl']['store']
   | SfdxOutputs['auth']['list']
