@@ -9,7 +9,7 @@ import SFDX, { SfdxOutputs } from '@ciguru/sfdx-ts-adapter';
 import { TestLevel as ApexTestLevel } from '@ciguru/sfdx-ts-adapter/dist/force/apex/test/run';
 import { TestLevel as DeployTestLevel } from '@ciguru/sfdx-ts-adapter/dist/force/mdapi/deploy';
 import { OverrideDefinition } from '@ciguru/sfdx-ts-adapter/dist/force/org/create';
-import MetadataDeploy from './metadataDeploy';
+import MetadataDeploy from './metadata-deploy';
 import { DataSoqlQueryCsv } from './soql-query';
 
 interface Sfdx {
