@@ -45,7 +45,7 @@ const result = ci.getOutputs();
 ## Supported configuration file formats
 
 You can use YAML (`.yaml` or `.yml`) or JSON (`.json`) files to set up the
-configuration. You can import [JSON Schema](/schema/schema-v1.0.0.json) in
+configuration. You can import [JSON Schema](/schema/schema-v1.1.0.json) in
 your IDE to simplify configuration process (guidelines for
 [WebStorm](https://www.jetbrains.com/help/webstorm/json.html#ws_json_using_schemas) and
 [VS Code](https://code.visualstudio.com/docs/languages/json#_json-schemas-and-settings)).
@@ -56,7 +56,7 @@ your IDE to simplify configuration process (guidelines for
 
 <table>
 <tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td><b>Description</b></td></tr>
-<tr><td>version</td><td>enum</td><td>true</td><td>CI Configuration version. Values:<br/>- 1.0.1<br/>- 1.0.0<br/>- 1.0<br/>- 1.0.x<br/>- 1.x</td></tr>
+<tr><td>version</td><td>enum</td><td>true</td><td>CI Configuration version. Values:<br/>- 1.x</td></tr>
 <tr><td>inputs</td><td>Input[]</td><td>false</td><td>User input data. Supported by CLI tools</td></tr>
 <tr><td>vars</td><td>Variable[]</td><td>false</td><td>Configuration variables</td></tr>
 <tr><td>steps</td><td>Step[]</td><td>true</td><td>Job steps</td></tr>
