@@ -101,6 +101,7 @@ your IDE to simplify configuration process (guidelines for
 - sfdx.auth.sfdxUrl - Authorize an org using sfdxurl<br/>
 - sfdx.force.apex.execute - Executes anonymous Apex code<br/>
 - sfdx.force.apex.test.run - Invoke Apex tests<br/>
+- sfdx.force.data.bulk.delete - Bulk delete records from a CSV file<br/>
 - sfdx.force.data.bulk.upsert - Bulk upsert records from a CSV file<br/>
 - sfdx.force.data.tree.import - Import data into an org<br/>
 - sfdx.force.data.soql.query.csv - Import data into an org<br/>
@@ -189,6 +190,19 @@ Invoke Apex tests
 <tr><td>targetUserName</td><td>string</td><td>true</td><td>yes</td><td>Username or alias for the target org. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
 <tr><td>testLevel</td><td>enum</td><td>true</td><td>-</td><td>Specifies which tests to run, using one of these TestLevel enum values:<br/>- RunSpecifiedTests—Only the tests that you specify are run (not supported yet)<br/>- RunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages<br/>- RunAllTestsInOrg—All tests are in your org and in installed managed packages are run</td></tr>
 <tr><td>outputDir</td><td>string</td><td>true</td><td>yes</td><td>Directory to store test run files</td></tr>
+</table>
+
+#### Additional attributes for `sfdx.force.data.bulk.delete` step
+
+Bulk delete records from a CSV file
+
+<table>
+<tr><td><b>Attribute</b></td><td><b>Type</b></td><td><b>Required</b></td><td>$ref syntax</td><td><b>Description</b></td></tr>
+<tr><td>targetUserName</td><td>string</td><td>true</td><td>yes</td><td>Username or alias for the target org. Pattern: [0-9A-Za-z_-]{1,40}</td></tr>
+<tr><td>csvFile</td><td>string</td><td>true</td><td>yes</td><td>Path to the CSV file that defines the records to delete</td></tr>
+<tr><td>sObjectType</td><td>string</td><td>true</td><td>-</td><td>SObject type of the records you want to delete. Pattern: [A-Za-z][0-9A-Za-z_]{0,38}[0-9A-Za-z]</td></tr>
+<tr><td>allowNoMoreFailedBatches</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Batches is less than the specified number (default: 0).</td></tr>
+<tr><td>allowNoMoreFailedRecords</td><td>number</td><td>false</td><td>-</td><td>Mark a step as successful if the number of Failed Records is less than the specified number (default: 0).</td></tr>
 </table>
 
 #### Additional attributes for `sfdx.force.data.bulk.upsert` step

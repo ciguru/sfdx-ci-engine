@@ -16,6 +16,7 @@ export type Output =
   | SfdxOutputs['auth']['logout']
   | SfdxOutputs['force']['apex']['execute']
   | SfdxOutputs['force']['apex']['test']['run']
+  | SfdxOutputs['force']['data']['bulk']['delete']
   | SfdxOutputs['force']['data']['bulk']['upsert']
   | SfdxOutputs['force']['data']['tree']['import']
   | SfdxOutputs['force']['data']['soql']['queryCsv']

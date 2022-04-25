@@ -20,6 +20,7 @@ import {
   StepSfdxAuthSfdxUrl,
   StepSfdxForceApexExecute,
   StepSfdxForceApexTestRun,
+  StepSfdxForceDataBulkDelete,
   StepSfdxForceDataBulkUpsert,
   StepSfdxForceDataTreeImport,
   StepSfdxForceDataSoqlQueryCsv,
@@ -40,6 +41,7 @@ type StepTypes =
   | StepSfdxAuthSfdxUrl
   | StepSfdxForceApexExecute
   | StepSfdxForceApexTestRun
+  | StepSfdxForceDataBulkDelete
   | StepSfdxForceDataBulkUpsert
   | StepSfdxForceDataTreeImport
   | StepSfdxForceDataSoqlQueryCsv
@@ -72,6 +74,7 @@ export default class CiEngine {
     'sfdx.auth.sfdxUrl': async (step: StepSfdxAuthSfdxUrl) => this.sfdxAuthSfdxUrl(step),
     'sfdx.force.apex.execute': async (step: StepSfdxForceApexExecute) => this.sfdxForceApexExecute(step),
     'sfdx.force.apex.test.run': async (step: StepSfdxForceApexTestRun) => this.sfdxForceApexTestRun(step),
+    'sfdx.force.data.bulk.delete': async (step: StepSfdxForceDataBulkDelete) => this.sfdxForceDataBulkDelete(step),
     'sfdx.force.data.bulk.upsert': async (step: StepSfdxForceDataBulkUpsert) => this.sfdxForceDataBulkUpsert(step),
     'sfdx.force.data.tree.import': async (step: StepSfdxForceDataTreeImport) => this.sfdxForceDataTreeImport(step),
     'sfdx.force.data.soql.query.csv': async (step: StepSfdxForceDataSoqlQueryCsv) =>
@@ -232,6 +235,21 @@ export default class CiEngine {
         this.vars.getStringValue(step.targetUserName),
         this.vars.getStringValue(step.outputDir),
         step.testLevel,
+      );
+      this.vars.setOutput({ id: step.id, outputs });
+    } catch (e) {
+      this.stepErrorHandler(step, e as SfdxAdapterError);
+    }
+  }
+
+  private async sfdxForceDataBulkDelete(step: StepSfdxForceDataBulkDelete): Promise<void> {
+    try {
+      const outputs = await SFDX.force.data.bulk.delete(
+        this.vars.getStringValue(step.targetUserName),
+        this.vars.getStringValue(step.csvFile),
+        step.sObjectType,
+        step.allowNoMoreFailedBatches,
+        step.allowNoMoreFailedRecords,
       );
       this.vars.setOutput({ id: step.id, outputs });
     } catch (e) {

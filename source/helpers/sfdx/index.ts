@@ -40,6 +40,13 @@ interface Sfdx {
     };
     data: {
       bulk: {
+        delete: (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          allowNoMoreFailedBatches?: number,
+          allowNoMoreFailedRecords?: number,
+        ) => Promise<SfdxOutputs['force']['data']['bulk']['delete']>;
         upsert: (
           targetUserName: string,
           csvFile: string,
@@ -123,6 +130,20 @@ const sfdx: Sfdx = {
     },
     data: {
       bulk: {
+        delete: async (
+          targetUserName: string,
+          csvFile: string,
+          sObjectType: string,
+          allowNoMoreFailedBatches?: number,
+          allowNoMoreFailedRecords?: number,
+        ) =>
+          await SFDX.force.data.bulk.delete(
+            targetUserName,
+            csvFile,
+            sObjectType,
+            allowNoMoreFailedBatches,
+            allowNoMoreFailedRecords,
+          ),
         upsert: async (
           targetUserName: string,
           csvFile: string,
